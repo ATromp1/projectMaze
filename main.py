@@ -17,20 +17,26 @@ class Grid:
         self.width = width
         self.height = height
         self.direction = None
+        self.dir_list = []
+        self.size = width * height
         self.data = np.ndarray(shape=(width, height), dtype=Tile)
         for col in range(height):
             for row in range(width):
                 self.data[row][col] = Tile(col, row, value)
 
-        self.history = [np.random.choice(self.data.ravel())]
-
-        #set starting point value
-        self.history[0].value = 'p'
+        # self.current_walk = [np.random.choice(self.data.ravel())]
+        self.current_walk = self.new_random_point()
+        self.tree = []
+        # set starting point value
+        self.current_walk[0].value = 'p'
         # second starting point
         np.random.choice(self.data.ravel()).value = 'x'
 
-
-
+    def new_random_point(self):
+        new = np.random.choice(self.data.ravel())
+        for i in range(self.size):
+            if new.value == 'w':
+                return [new]
 
     def set(self, col, row, value):
         self.data[col][row].value = value
@@ -42,11 +48,11 @@ class Grid:
         print(self.data)
 
     def get_next_tile(self):
-        tile = self.history[-1]
+        tile = self.current_walk[-1]
         direction = self.pick_direction(tile)
+        self.dir_list.append(direction)
         row = tile.row
         col = tile.col
-        print(direction)
         match direction:
             case 'up':
                 self.direction = direction
@@ -66,8 +72,8 @@ class Grid:
 
     def move(self, next_tile):
         self.check_loop(next_tile)
-        self.history.append(next_tile)
-        self.history[-1].value = 'p'
+        self.current_walk.append(next_tile)
+        self.current_walk[-1].value = 'p'
 
     def pick_direction(self, tile):
         direction = ['up', 'down', 'left', 'right']
@@ -101,27 +107,32 @@ class Grid:
 
     def check_loop(self, next_tile):
         if next_tile.value == 'p':
-            # print(self.history.index(next_tile))
             x = np.where(self.data == next_tile)
-            # print("Grid index next tile", x)
-            # print("Which is:", self.data[x].tolist()[0].col, self.data[x].tolist()[0].row, self.data[x].tolist()[0].value)
-            history_index = self.history.index(self.data[x])
-            for element in reversed(self.history[history_index + 1:]):
+            history_index = self.current_walk.index(self.data[x])
+            for element in reversed(self.current_walk[history_index + 1:]):
                 self.data[element.row][element.col].value = 'w'
-            self.history = self.history[:history_index + 1]
+            self.current_walk = self.current_walk[:history_index + 1]
 
     def walk_path(self):
         while True:
             next_tile = self.get_next_tile()
             if next_tile.value == 'x':
                 self.move(next_tile)
-                self.printGrid()
+                self.tree.extend(self.current_walk)
+                self.current_walk = []
                 break
             self.move(next_tile)
-            self.printGrid()
 
 
 gridSize = 6
 grid = Grid(gridSize, gridSize, 'w')
-grid.printGrid()
+
+# grid.printGrid()
 grid.walk_path()
+test = []
+for x in grid.tree:
+    test.append([x.col, x.row, x.value])
+print(test)
+print(grid.dir_list)
+grid.printGrid()
+# print(grid.size)
