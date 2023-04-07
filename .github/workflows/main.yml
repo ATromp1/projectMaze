@@ -1,13 +1,13 @@
-name: tagpr
+name: Semantic Releaser
+
 on:
   push:
     branches:
-    - master
+      - master
+      
 jobs:
-  tagpr:
+  release:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: Songmu/tagpr@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: brpaz/action-semantic-release@v1
+
