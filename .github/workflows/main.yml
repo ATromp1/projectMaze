@@ -1,0 +1,36 @@
+name: Automatic Version Bump
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  bump_version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bumpversion
+      - name: Bump version
+        run: bumpversion minor
+      - name: Commit version bump
+        run: |
+          git config --local user.email "alexander@wundermart.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "Bump version"
+      - name: Create tag and release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git tag $(cat VERSION)
+          git push --tags
+          hub release create -m "Release $(cat VERSION)" $(cat VERSION)
+
