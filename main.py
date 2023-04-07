@@ -135,4 +135,6 @@ for x in grid.tree:
 print(test)
 print(grid.dir_list)
 grid.printGrid()
-# print(grid.size)
+# print(grid.sizEdfjslfsdf some kind of change here):wq
+:wq
+
